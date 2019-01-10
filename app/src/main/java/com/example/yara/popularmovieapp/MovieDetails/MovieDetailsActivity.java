@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.example.yara.popularmovieapp.MoviesResult;
 import com.example.yara.popularmovieapp.R;
 import com.example.yara.popularmovieapp.Utils.network.ApiClient;
 import com.example.yara.popularmovieapp.Utils.network.ApiServices;
+import com.example.yara.popularmovieapp.moviesAdapter;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -77,6 +79,7 @@ import retrofit2.Response;
     List<ReviewsResult>reviews;
     ApiServices apiServices;
     private AppDatabase mDB;
+    MovieDBAapter moviesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,11 +128,11 @@ import retrofit2.Response;
 
 //
         MainViewModel viewModel= ViewModelProviders.of(this).get(MainViewModel.class);
-        viewModel.getFavoriteList().observe(this, new Observer<List<MovieEntry>>() {
+        viewModel.getAllMovies().observe(this, new Observer<List<MovieEntry>>() {
 
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {
-                Log.d(TAG," from ViewModel  "+movieEntries.size() );
+                Log.d(TAG," from ViewModel  favorite list size  "+movieEntries.size() );
                 if (movieEntries.size()>0)
                     ch_favorite.setChecked(true);
                 else  ch_favorite.setChecked(false);
@@ -221,25 +224,24 @@ import retrofit2.Response;
     private void addToFavorite() {
         Log.d(TAG,"add to favorite"+id+"--"+Title+"--"+Date+"--"+Rate);
        final MovieEntry movieEntry=new MovieEntry(id,Title,PosterPath,Date,Rate);
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                mDB.movieDao().insertMovie(movieEntry);
-            }
-        });
+       MainViewModel viewModel=ViewModelProviders.of(this).get(MainViewModel.class);
+       viewModel.insert(movieEntry);
+//        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                mDB.movieDao().insertMovie(movieEntry);
+//
+//            }
+//        });
     }
     private void deleteFromFavorite() {
 
        final MovieEntry movieEntry=new MovieEntry(id,Title,PosterPath,Date,Rate);
-        Log.d(TAG,"  favorite"+movieEntry.getMovie_id()+"--"+movieEntry.getTitle());
+        Log.d(TAG,"favorite"+movieEntry.getMovie_id()+"--"+movieEntry.getTitle());
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG,"deleting...");
-                mDB.movieDao().deleteMovie(movieEntry);
-            }
-        });
+        MainViewModel viewModel= ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.deleteWord(movieEntry);
+
     }
 }
 

@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
     private void getFavorite() {
 
           MainViewModel viewModel= ViewModelProviders.of(this).get(MainViewModel.class);
-          viewModel.getList().observe(this, new Observer<List<MovieEntry>>() {
+          viewModel.getAllMovies().observe(this, new Observer<List<MovieEntry>>() {
 
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {

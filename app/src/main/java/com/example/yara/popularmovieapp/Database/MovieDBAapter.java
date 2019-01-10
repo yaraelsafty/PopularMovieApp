@@ -26,6 +26,7 @@ import java.util.List;
 
 public class MovieDBAapter extends ArrayAdapter<MovieEntry> {
     String TAG= this.getClass().getSimpleName();
+    private List<MovieEntry> movieEntries;
 
     public MovieDBAapter(@NonNull Context context, List<MovieEntry>moviesList) {
         super(context,0,moviesList);
@@ -71,6 +72,15 @@ public class MovieDBAapter extends ArrayAdapter<MovieEntry> {
         });
 
         return convertView;
+    }
+
+    public List<MovieEntry> getMovieEntries() {
+        return movieEntries;
+    }
+
+    public void setMovieEntries(List<MovieEntry> movieEntries) {
+        this.movieEntries = movieEntries;
+        notifyDataSetChanged();
     }
 }
 
