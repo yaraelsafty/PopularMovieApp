@@ -36,13 +36,8 @@ public class MainActivity extends AppCompatActivity {
     List<MoviesResult> moviesList = new ArrayList<>();
     ApiServices apiServices;
     GridView gridView;
+    int index , position ;
 
-    String LIST_STATE = "list_state";
-    Parcelable savedLayoutState;
-    static final String BUNDLE_LAYOUT = "layout";
-
-
-    // DatabaseHandler db = new DatabaseHandler(this);
    AppDatabase mDB;
 
     @Override
@@ -51,31 +46,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         gridView = findViewById(R.id.movies_grid);
 
+
         apiServices = ApiClient.getClient().create(ApiServices.class);
         mDB=AppDatabase.getsInstance(getApplicationContext());
         getPopularMovies();
+        moviesAdapter moviesAdapter = new moviesAdapter(MainActivity.this, moviesList);
+        gridView.setAdapter(moviesAdapter);
 
-       if (savedInstanceState != null){
-           moviesList = savedInstanceState.getParcelableArrayList(LIST_STATE);
-           savedLayoutState = savedInstanceState.getParcelable(BUNDLE_LAYOUT);
-           displayData();
-       }else {
-           initViews();
+       if (savedInstanceState != null) {
+           position = savedInstanceState.getInt("position");
+           Log.d(TAG,"position  "+position);
+           gridView.smoothScrollToPosition(position);
        }
 
  }
-   private void displayData(){
-       gridView = findViewById(R.id.movies_grid);
-       moviesAdapter moviesAdapter = new moviesAdapter(MainActivity.this, moviesList);
-       gridView.setAdapter(moviesAdapter);
-   }
 
-   private void initViews(){
-       gridView = findViewById(R.id.movies_grid);
-       moviesAdapter moviesAdapter = new moviesAdapter(MainActivity.this, moviesList);
-       gridView.setAdapter(moviesAdapter);
-        getMovies();
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -104,21 +90,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelableArrayList(LIST_STATE, (ArrayList<? extends Parcelable>) moviesList);
-        savedInstanceState.putParcelable(BUNDLE_LAYOUT, gridView.onSaveInstanceState());
-
+        index = gridView.getFirstVisiblePosition();
+        savedInstanceState.putInt("position", index);
     }
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        moviesList = savedInstanceState.getParcelableArrayList(LIST_STATE);
-        savedLayoutState = savedInstanceState.getParcelable(BUNDLE_LAYOUT);
         super.onRestoreInstanceState(savedInstanceState);
+         position = savedInstanceState.getInt("position");
     }
-    private void restoreLayoutManagerPosition() {
-        if (savedLayoutState != null) {
-            gridView.onRestoreInstanceState(savedLayoutState);
-        }
-    }
+
 
 
     private void getTopRatedMovies() {
@@ -127,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<MoviesResponseModel> call, Response<MoviesResponseModel> response) {
                 moviesList = response.body().getResults();
-                moviesAdapter moviesAdapter = new moviesAdapter(MainActivity.this, moviesList);
-                gridView.setAdapter(moviesAdapter);
+//                moviesAdapter moviesAdapter = new moviesAdapter(MainActivity.this, moviesList);
+//                gridView.setAdapter(moviesAdapter);
 
             }
 
