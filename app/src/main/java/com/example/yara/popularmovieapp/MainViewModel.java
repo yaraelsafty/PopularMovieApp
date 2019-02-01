@@ -37,9 +37,9 @@ public class MainViewModel extends AndroidViewModel {
     }
 
 
-    public void deleteWord(MovieEntry movieEntry) {
-        mRepository.deleteWord(movieEntry);
-    }
+//    public void deleteWord(MovieEntry movieEntry) {
+//        mRepository.deleteWord(movieEntry);
+//    }
    public LiveData<List<MovieEntry>> getAllMovies() {
         return list;
     }

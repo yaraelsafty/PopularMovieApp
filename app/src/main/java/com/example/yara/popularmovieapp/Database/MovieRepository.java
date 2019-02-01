@@ -31,13 +31,6 @@ public class MovieRepository {
     }
 
 
-    // Need to run off main thread
-    public void deleteWord(MovieEntry word) {
-        new deleteWordAsyncTask(mMovieDao).execute(word);
-    }
-
-    // Static inner classes below here to run database interactions
-    // in the background.
 
     /**
      * Insert a word into the database.
@@ -59,21 +52,5 @@ public class MovieRepository {
 
 
 
-    /**
-     *  Delete a single word from the database.
-     */
-    private static class deleteWordAsyncTask extends AsyncTask<MovieEntry, Void, Void> {
-        private MovieDao mAsyncTaskDao;
-
-        deleteWordAsyncTask(MovieDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final MovieEntry... params) {
-            mAsyncTaskDao.deleteMovie(params[0]);
-            return null;
-        }
-    }
 }
 

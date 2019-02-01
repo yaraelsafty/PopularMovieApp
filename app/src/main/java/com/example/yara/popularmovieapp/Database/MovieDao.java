@@ -24,9 +24,7 @@ public interface MovieDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void  updateMovie (MovieEntry movieEntry);
 
-    @Delete
-    void  deleteMovie (MovieEntry movieEntry);
+    @Query("delete from Movies where movie_id=:id")
+    void  deleteMovie (int id);
 
-    @Query("SELECT * from Movies where movie_id = :movie_id")
-    LiveData<List<MovieEntry>> IsFavorite(int movie_id);
 }
