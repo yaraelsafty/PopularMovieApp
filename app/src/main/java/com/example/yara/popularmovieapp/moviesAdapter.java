@@ -38,7 +38,7 @@ public class moviesAdapter extends ArrayAdapter<MoviesResult> {
         }
 
         ImageView iconView = (ImageView) convertView.findViewById(R.id.movie_image);
-        Picasso.with(getContext()).load("https://image.tmdb.org/t/p/original"+movies.getPosterPath()).placeholder(R.mipmap.ic_launcher).into(iconView);
+        Picasso.with(getContext()).load("https://image.tmdb.org/t/p/original"+movies.getPosterPath()).placeholder(R.drawable.noimage).into(iconView);
 
 
         TextView titleView = (TextView) convertView.findViewById(R.id.movie_title);
@@ -49,8 +49,9 @@ public class moviesAdapter extends ArrayAdapter<MoviesResult> {
 
         TextView dateView=convertView.findViewById(R.id.tv_movie_release_date);
         String currentString = movies.getReleaseDate();
-        Log.d(TAG,"date  "+movies.getReleaseDate());
         String[] separated = currentString.split("-");
+        Log.d(TAG,"date  "+movies.getReleaseDate()+"  "+separated[0]);
+
         dateView.setText(separated[0]);
 
 

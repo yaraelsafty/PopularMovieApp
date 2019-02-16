@@ -8,12 +8,17 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -55,37 +60,52 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.spec.IvParameterSpec;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
     public class MovieDetailsActivity extends AppCompatActivity  {
-    String TAG=MovieDetailsActivity.this.getClass().getSimpleName();
+        private String TAG=MovieDetailsActivity.this.getClass().getSimpleName();
 
-    ImageView poster;
-    TextView tv_movie_date ,tv_movie_time,tv_movie_review,tv_movie_overView;
-    CheckBox ch_favorite;
-    RecyclerView rv_reviews,rv_trailer;
-     public static int id;
+        private ImageView poster;
+        private TextView tv_movie_date ,tv_movie_time,tv_movie_review,tv_movie_overView;
+        private CheckBox ch_favorite;
+        private RecyclerView rv_reviews,rv_trailer;
+        private   ImageView expandedImage;
 
-
-
-    String Title;
-    String PosterPath;
-    double Rate;
-    String Date;
-
-    List<TrailsResults>trails;
-    List<ReviewsResult>reviews;
-    ApiServices apiServices;
-    private AppDatabase mDB;
+        public static int id;
 
 
-    @Override
+        private CollapsingToolbarLayout collapsingToolbarLayout;
+        private String Title;
+        private String PosterPath;
+        private double Rate;
+        private String Date;
+
+        private List<TrailsResults>trails;
+        private List<ReviewsResult>reviews;
+        private ApiServices apiServices;
+        private AppDatabase mDB;
+        private Menu menu;
+        CollapsingToolbarLayout ctl;
+
+        @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
-        poster=findViewById(R.id.iv_movie);
+            Toolbar myToolbar =  findViewById(R.id.z_toolbar);
+            setSupportActionBar(myToolbar);
+             expandedImage=findViewById(R.id.expandedImage);
+
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            ctl = findViewById(R.id.collapsing_toolbar);
+            ctl.setCollapsedTitleTextAppearance(R.style.coll_toolbar_title);
+            ctl.setExpandedTitleTextAppearance(R.style.exp_toolbar_title);
+            poster=findViewById(R.id.iv_movie);
         tv_movie_date=findViewById(R.id.tv_movie_date);
         tv_movie_time=findViewById(R.id.tv_movie_time);
         tv_movie_review=findViewById(R.id.tv_movie_review);
@@ -93,6 +113,7 @@ import retrofit2.Response;
         rv_trailer=findViewById(R.id.rv_trailer);
         rv_reviews=findViewById(R.id.rv_reviews);
         ch_favorite=findViewById(R.id.ch_favorite);
+
 
         apiServices = ApiClient.getClient().create(ApiServices.class);
         mDB=AppDatabase.getsInstance(getApplicationContext());
@@ -155,11 +176,15 @@ import retrofit2.Response;
             @Override
             public void onResponse(Call<MovieDetailsModel> call, Response<MovieDetailsModel> response) {
                 Title=response.body().getTitle();
+                ctl.setTitle(Title);
+
                 PosterPath=response.body().getPosterPath();
                 Date=response.body().getReleaseDate();
                 Rate= response.body().getVoteAverage();
 
-                Picasso.with(MovieDetailsActivity.this).load("https://image.tmdb.org/t/p/original"+response.body().getPosterPath()).placeholder(R.mipmap.ic_launcher).into(poster);
+                Picasso.with(MovieDetailsActivity.this).load("https://image.tmdb.org/t/p/original"+response.body().getPosterPath()).placeholder(R.drawable.noimage).into(poster);
+                Picasso.with(MovieDetailsActivity.this).load("https://image.tmdb.org/t/p/original"+response.body().getPosterPath()).placeholder(R.drawable.noimage).into(expandedImage);
+
                 tv_movie_date.setText(response.body().getReleaseDate());
                 tv_movie_time.setText(response.body().getRuntime()+" min");
                 tv_movie_review.setText(response.body().getVoteAverage()+"/10");
@@ -238,5 +263,5 @@ import retrofit2.Response;
         });
 
     }
-}
+    }
 
