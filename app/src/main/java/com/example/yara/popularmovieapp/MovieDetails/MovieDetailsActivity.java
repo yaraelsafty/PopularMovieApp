@@ -70,14 +70,17 @@ import retrofit2.Response;
         private String TAG=MovieDetailsActivity.this.getClass().getSimpleName();
 
         private ImageView poster;
-        private TextView tv_movie_date ,tv_movie_time,tv_movie_review,tv_movie_overView;
+        private TextView tv_title ,tv_movie_date ,tv_movie_time,tv_movie_review,tv_movie_overView;
         private CheckBox ch_favorite;
         private RecyclerView rv_reviews,rv_trailer;
         private   ImageView expandedImage;
+        private View v_summary,v_trailer,v_reviews;
+        private TextView tv_summary,tv_reviews,tv_trailer;
 
         public static int id;
 
-
+        private   AppBarLayout appBarLayout;
+        private TextView titleTv;
         private CollapsingToolbarLayout collapsingToolbarLayout;
         private String Title;
         private String PosterPath;
@@ -95,17 +98,19 @@ import retrofit2.Response;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
-            Toolbar myToolbar =  findViewById(R.id.z_toolbar);
-            setSupportActionBar(myToolbar);
-             expandedImage=findViewById(R.id.expandedImage);
-
-            getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            ctl = findViewById(R.id.collapsing_toolbar);
-            ctl.setCollapsedTitleTextAppearance(R.style.coll_toolbar_title);
-            ctl.setExpandedTitleTextAppearance(R.style.exp_toolbar_title);
-            poster=findViewById(R.id.iv_movie);
+            appBarLayout = findViewById(R.id.appbar);
+            titleTv = findViewById(R.id.movie_title);
+            expandedImage=findViewById(R.id.expandedImage);
+//            Toolbar myToolbar =  findViewById(R.id.z_toolbar);
+//            setSupportActionBar(myToolbar);
+//             expandedImage=findViewById(R.id.expandedImage);
+//            getSupportActionBar().setHomeButtonEnabled(true);
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+ //           ctl = findViewById(R.id.collapsing_toolbar);
+//            ctl.setCollapsedTitleTextAppearance(R.style.coll_toolbar_title);
+//            ctl.setExpandedTitleTextAppearance(R.style.exp_toolbar_title);
+        poster=findViewById(R.id.iv_movie);
+        tv_title=findViewById(R.id.tv_movie_title);
         tv_movie_date=findViewById(R.id.tv_movie_date);
         tv_movie_time=findViewById(R.id.tv_movie_time);
         tv_movie_review=findViewById(R.id.tv_movie_review);
@@ -113,6 +118,12 @@ import retrofit2.Response;
         rv_trailer=findViewById(R.id.rv_trailer);
         rv_reviews=findViewById(R.id.rv_reviews);
         ch_favorite=findViewById(R.id.ch_favorite);
+        v_reviews=findViewById(R.id.v_reviews);
+        v_trailer=findViewById(R.id.v_trailers);
+        v_summary=findViewById(R.id.v_summary);
+        tv_summary=findViewById(R.id.tv_summary);
+        tv_reviews=findViewById(R.id.tv_reviews);
+        tv_trailer=findViewById(R.id.tv_trailers);
 
 
         apiServices = ApiClient.getClient().create(ApiServices.class);
@@ -137,6 +148,28 @@ import retrofit2.Response;
             }
         });
 
+            expandedImage.setVisibility(View.VISIBLE);
+            titleTv.setVisibility(View.GONE);
+            poster.setVisibility(View.GONE);
+            appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                @Override
+                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+
+                    if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
+                        //  Collapsed
+                        expandedImage.setVisibility(View.GONE);
+                        titleTv.setVisibility(View.VISIBLE);
+                        poster.setVisibility(View.VISIBLE);
+
+                    } else {
+                        //Expanded
+                        expandedImage.setVisibility(View.VISIBLE);
+                        titleTv.setVisibility(View.GONE);
+                        poster.setVisibility(View.GONE);
+
+                    }
+                }
+            });
 
         fetchData();
         getTrails();
@@ -175,9 +208,13 @@ import retrofit2.Response;
         call.enqueue(new Callback<MovieDetailsModel>() {
             @Override
             public void onResponse(Call<MovieDetailsModel> call, Response<MovieDetailsModel> response) {
-                Title=response.body().getTitle();
-                ctl.setTitle(Title);
+                tv_summary.setVisibility(View.VISIBLE);
+                 v_summary.setVisibility(View.VISIBLE);
 
+                Title=response.body().getTitle();
+                titleTv.setText(Title);
+
+                tv_title.setText(Title);
                 PosterPath=response.body().getPosterPath();
                 Date=response.body().getReleaseDate();
                 Rate= response.body().getVoteAverage();
@@ -207,11 +244,15 @@ import retrofit2.Response;
             @Override
             public void onResponse(Call<TrailersResponse> call, Response<TrailersResponse> response) {
                 trails=response.body().getResults();
-                TrailsAdapter trailsAdapter=new TrailsAdapter(trails,MovieDetailsActivity.this);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
-                rv_trailer.setLayoutManager(mLayoutManager);
-                rv_trailer.setItemAnimator(new DefaultItemAnimator());
-                rv_trailer.setAdapter(trailsAdapter);
+
+                    tv_trailer.setVisibility(View.VISIBLE);
+                    v_trailer.setVisibility(View.VISIBLE);
+                    TrailsAdapter trailsAdapter = new TrailsAdapter(trails, MovieDetailsActivity.this);
+                    RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+                    rv_trailer.setLayoutManager(mLayoutManager);
+                    rv_trailer.setItemAnimator(new DefaultItemAnimator());
+                    rv_trailer.setAdapter(trailsAdapter);
+
             }
 
             @Override
@@ -228,11 +269,15 @@ import retrofit2.Response;
             @Override
             public void onResponse(Call<ReviewsResponse> call, Response<ReviewsResponse> response) {
                 reviews=response.body().getResults();
-                ReviewsAdapter reviewsAdapter=new ReviewsAdapter(reviews,MovieDetailsActivity.this);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                rv_reviews.setLayoutManager(mLayoutManager);
-                rv_reviews.setItemAnimator(new DefaultItemAnimator());
-                rv_reviews.setAdapter(reviewsAdapter);
+                if (reviews.size()>0) {
+                    tv_reviews.setVisibility(View.VISIBLE);
+                    v_reviews.setVisibility(View.VISIBLE);
+                    ReviewsAdapter reviewsAdapter = new ReviewsAdapter(reviews, MovieDetailsActivity.this);
+                    RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    rv_reviews.setLayoutManager(mLayoutManager);
+                    rv_reviews.setItemAnimator(new DefaultItemAnimator());
+                    rv_reviews.setAdapter(reviewsAdapter);
+                }
             }
 
             @Override
